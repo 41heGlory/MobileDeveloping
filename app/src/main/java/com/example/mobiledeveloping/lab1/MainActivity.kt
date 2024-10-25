@@ -1,4 +1,4 @@
-package com.example.mobiledeveloping
+package com.example.mobiledeveloping.lab1
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

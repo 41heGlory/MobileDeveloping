@@ -1,4 +1,4 @@
-package com.example.mobiledeveloping
+package com.example.mobiledeveloping.lab1
 
 abstract class Shape(val name: String, val color: String) {
     abstract fun area(): Double
