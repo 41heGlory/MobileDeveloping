@@ -30,6 +30,7 @@ import coil.compose.AsyncImage
 import com.example.mobiledeveloping.R
 import com.example.mobiledeveloping.data.WeatherModel
 import com.example.mobiledeveloping.ui.theme.BlueLight
+import com.example.myapplication.data.HourDto
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
@@ -40,41 +41,32 @@ import org.json.JSONObject
 
 
 @Composable
-fun MainScreen (currentDay:  MutableState<WeatherModel>, onClickSync: () -> Unit, onClickSearch: () -> Unit){
-    Column(
-        modifier = Modifier
-            .padding(5.dp),
-    ) {
+fun MainScreen(currentDay: MutableState<WeatherModel>, onClickSync: () -> Unit, onClickSearch: () -> Unit) {
+    // Проверка, что данные инициализированы
+    if (currentDay.value.city.isEmpty()) {
+        // Отображаем сообщение о загрузке или пустом состоянии
+        Text(text = "Loading...", color = Color.White)
+        return
+    }
+
+    Column(modifier = Modifier.padding(5.dp)) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             backgroundColor = BlueLight,
-            elevation = 0.dp,
-
-            ){
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ){
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ){
+            elevation = 0.dp
+        ) {
+            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(
                         text = currentDay.value.time,
-                        modifier = Modifier.padding(
-                            top = 8.dp,
-                            start = 8.dp
-                        ),
+                        modifier = Modifier.padding(top = 8.dp, start = 8.dp),
                         color = Color.White
                     )
                     AsyncImage(
                         model = "https:" + (currentDay.value.icon ?: ""),
-                        contentDescription = "im2",
+                        contentDescription = "Weather Icon",
                         modifier = Modifier
-                            .padding(
-                                top = 3.dp,
-                                end = 8.dp
-                            )
+                            .padding(top = 3.dp, end = 8.dp)
                             .size(35.dp)
                     )
                 }
@@ -84,11 +76,10 @@ fun MainScreen (currentDay:  MutableState<WeatherModel>, onClickSync: () -> Unit
                     color = Color.White
                 )
                 Text(
-                    text = if(currentDay.value.currentTemp.isNotEmpty())
-                        currentDay.value.currentTemp.toFloat().toInt().toString() + "°C"
-                    else currentDay.value.maxTemp.toFloat().toInt().toString() +
-                            "°C/${currentDay.value.minTemp.toFloat().toInt()}°C"
-                    ,
+                    text = if (currentDay.value.currentTemp.isNotEmpty())
+                        "${currentDay.value.currentTemp}"
+                    else
+                        "${currentDay.value.maxTemp}/${currentDay.value.minTemp}",
                     style = TextStyle(fontSize = 65.sp),
                     color = Color.White
                 )
@@ -97,44 +88,29 @@ fun MainScreen (currentDay:  MutableState<WeatherModel>, onClickSync: () -> Unit
                     style = TextStyle(fontSize = 16.sp),
                     color = Color.White
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ){
-                    IconButton(
-                        onClick = {
-                            onClickSearch.invoke()
-                        }
-                    ) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    IconButton(onClick = { onClickSearch.invoke() }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_search),
-                            contentDescription = "im3",
+                            contentDescription = "Search",
                             tint = Color.White
                         )
                     }
                     Text(
-                        text = "${currentDay.value
-                            .maxTemp.toFloat().toInt()}°C/${currentDay
-                            .value.minTemp.toFloat().toInt()}°C",
+                        text = "${currentDay.value.maxTemp}/${currentDay.value.minTemp}",
                         style = TextStyle(fontSize = 16.sp),
                         color = Color.White
                     )
-                    IconButton(
-                        onClick = {
-                            onClickSync.invoke()
-                        }
-                    ){
+                    IconButton(onClick = { onClickSync.invoke() }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_synch),
-                            contentDescription = "im4",
+                            contentDescription = "Sync",
                             tint = Color.White
                         )
                     }
                 }
-
             }
         }
-
     }
 }
 
@@ -191,25 +167,29 @@ fun TabLayout(daysList: MutableState<List<WeatherModel>>, currentDay: MutableSta
     }
 }
 
-private fun getWeatherByHours(hours: String): List<WeatherModel>{
+private fun getWeatherByHours(hours: List<HourDto>): List<WeatherModel> {
     if (hours.isEmpty()) return listOf()
-    val hoursArray = JSONArray(hours)
+
     val list = ArrayList<WeatherModel>()
-    for (i in 0 until hoursArray.length()){
-        val item = hoursArray[i] as JSONObject
+
+    hours.forEach { item ->
+
         list.add(
             WeatherModel(
-                "",
-                item.getString("time"),
-                item.getString("temp_c").toFloat().toInt().toString() + "°C",
-                item.getJSONObject("condition").getString("text"),
-                item.getJSONObject("condition").getString("icon"),
-                "",
-                "",
-                ""
+                city = "",
+                time = item.time,
+                currentTemp = item.tempC.toFloat().toInt().toString() + "°C",
+                condition = item.condition.text,
+                icon = item.condition.icon,
+                maxTemp = "",
+                minTemp = "",
+                hours = listOf()
             )
         )
+
     }
     return list
 }
+
+
 
