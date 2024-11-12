@@ -12,9 +12,9 @@ import androidx.compose.material.Card
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.TabRowDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.rememberCoroutineScope
@@ -68,7 +68,7 @@ fun MainScreen (currentDay:  MutableState<WeatherModel>, onClickSync: () -> Unit
                         color = Color.White
                     )
                     AsyncImage(
-                        model = "https:" + currentDay.value.icon,
+                        model = "https:" + (currentDay.value.icon ?: ""),
                         contentDescription = "im2",
                         modifier = Modifier
                             .padding(
@@ -138,9 +138,7 @@ fun MainScreen (currentDay:  MutableState<WeatherModel>, onClickSync: () -> Unit
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalFoundationApi::class,
-    ExperimentalPagerApi::class
-)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalPagerApi::class)
 @Composable
 fun TabLayout(daysList: MutableState<List<WeatherModel>>, currentDay: MutableState<WeatherModel>){
     val tabList = listOf("HOURS", "DAYS")
